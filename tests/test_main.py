@@ -45,7 +45,7 @@ def test_convert_all():
     convert_all(str(INPUT_ROOT_DIR), str(OUTPUT_ROOT_DIR))
 
 
-def test_check_directory_path():
+def check_directory_path():
     """
     コンバート後ディレクトリの確認その1
     FIXME: なんとなくそう思ってたけど、バグっている
@@ -63,7 +63,7 @@ def test_check_directory_path():
         )
 
 
-def test_cleanup_file():
+def cleanup_file():
     """
     問題なく作れたデータが削除できることの確認。（権限チェック）
     コンバート後のフォルダ構成を元に戻す処理を兼ねている。
