@@ -2,11 +2,79 @@ import argparse
 import os
 from typing import Optional
 from PIL import Image
+import yaml
 
 Setting = Optional[argparse.Namespace]
 
 
-def args() -> Setting:
+class Logger:
+    """
+    このアプリ用の Logger 定義。
+
+    yaml形式のコンフィグから読み出して、セットする。
+    設定のロードに失敗するなど、上手くいかない場合はなるべくデフォルトのロガーをセットする。
+    """
+
+    _logger = None
+
+    def __init__(self, setting: Setting = None):
+        if setting:
+            config_file = setting.logger_config or None
+            self._debug = setting.debug
+            _logger = self.create_config(config_file)
+        else:
+            self._debug = True
+            _logger = self.create_default_config()
+        self._logger = _logger
+
+    def logger_name(self):
+        if self._debug:
+            return "WebpConverterAppDebug"
+        return "WebpConverterApp"
+
+    def create_config(self, config_file):
+        if config_file:
+            return self.create_custom_logger(config_file)
+        return self.default_config()
+
+    def create_custom_logger(self, config_file):
+        import logging
+        import logging.config
+
+        _logger = None
+        try:
+            logging.config.dictConfig(yaml.safe_load(config_file))
+            _logger = logging.getLogger(self.logger_name())
+            _logger.debug("custom logger_init")
+        except yaml.YAMLError as e:
+            import traceback
+
+            # logger の設定前に失敗しているのでここは print
+            print(f"yaml load error: {traceback.format_exc()}")
+        finally:
+            if not _logger:
+                _logger = self.create_config()
+            del logging
+        return _logger
+
+    def create_default_config(self):
+        import logging
+        import logging.config
+
+        logging.basicConfig(
+            format="%(levelname)s:%(message)s", level=logging.DEBUG
+        )
+        _logger = logging.getLogger(self.logger_name())
+        _logger.debug("default logger_init")
+        del logging
+
+        return _logger
+
+    def get_logger(self):
+        return self._logger
+
+
+def parse_args() -> Setting:
     parser = argparse.ArgumentParser(description="Convert image to webp")
     parser.add_argument(
         "-i",
@@ -25,15 +93,42 @@ def args() -> Setting:
     parser.add_argument(
         "-m", "--mode", default=None, type=str, help="mode(feature)"
     )
+    parser.add_argument(
+        "--logger-config",
+        default="logging.yaml",
+        type=argparse.FileType("r"),
+        help="logger config",
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="debug mode",
+    )
     return parser.parse_args()
+
+
+def fix_patch() -> None:
+    """
+    ライブラリ周りでこちらがしてほしくない動きをするものを修正する。
+    今は PIL で DEBUG レベルのログが出るので、それを抑え込む処理だけ入っている。
+
+    Returns:
+        None
+    """
+
+    import logging
+
+    pil_logger = logging.getLogger("PIL")
+    pil_logger.setLevel(logging.INFO)
+    del logging
 
 
 def run(setting: Setting) -> None:
     input_root_dir = setting.input_directory
     output_root_dir = setting.output_directory
-    print(f"start convert: {input_root_dir} -> {output_root_dir}")
+    logger.debug(f"start convert: {input_root_dir} -> {output_root_dir}")
     convert_all(input_root_dir=input_root_dir, output_root_dir=output_root_dir)
-    print(f"end convert: {input_root_dir} -> {output_root_dir}")
+    logger.debug(f"end convert: {input_root_dir} -> {output_root_dir}")
 
 
 def convert_all(input_root_dir: str, output_root_dir: str):
@@ -42,7 +137,7 @@ def convert_all(input_root_dir: str, output_root_dir: str):
         if file_count == 0:
             # skip
             continue
-        print(f"{dir_path} count: {file_count}")
+        logger.debug(f"{dir_path} count: {file_count}")
         for filename in file_list:
             input_dir = dir_path
             t = dir_path.split("/")
@@ -66,11 +161,11 @@ def convert(input_dir: str, output_dir: str, filename: str) -> None:
     def _row_copy(inp, out):
         import shutil
 
-        print(f"Copy: {inp} -> {out}")
+        logger.debug(f"Copy: {inp} -> {out}")
         try:
             shutil.copy2(inp, out)
         except Exception as e:
-            print(f"Copy failed[{inp} -> {out}]: {e}")
+            logger.warning(f"Copy failed[{inp} -> {out}]: {e}")
 
     def _is_image_file(f_):
         fragments = f_.split(".")
@@ -87,7 +182,7 @@ def convert(input_dir: str, output_dir: str, filename: str) -> None:
 
     try:
         if is_image:
-            print(f"Try convert: {input_path} -> {output_path}")
+            logger.info(f"Try convert: {input_path} -> {output_path}")
             im = Image.open(input_path)
             im.save(output_path, "webp")
         else:
@@ -96,10 +191,13 @@ def convert(input_dir: str, output_dir: str, filename: str) -> None:
         import traceback
 
         # print error, but continue
-        print("Error: %s", e)
+        logger.warning("Error: %s", e)
         # そのままコピーする
         _row_copy(input_path, output_path)
 
 
 if __name__ == "__main__":
-    run(args())
+    setting_ = parse_args()
+    logger = Logger(setting_).get_logger()
+    fix_patch()
+    run(setting_)

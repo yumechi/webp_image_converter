@@ -1,0 +1,29 @@
+version: 1
+formatters:
+  default:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  production:
+    format: '%(asctime)s %(levelname)s %(message)s'
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: default
+    stream: ext://sys.stdout
+  production:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: production
+    stream: ext://sys.stdout
+loggers:
+  WebpConverterAppDebug:
+    level: DEBUG
+    handlers: [ console ]
+    propagate: no
+  WebpConverterApp:
+    level: INFO
+    handlers: [ production ]
+    propagate: no
+root:
+  level: NOTSET
+  handlers: [ console ]
