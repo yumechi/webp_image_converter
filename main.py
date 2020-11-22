@@ -124,14 +124,17 @@ def fix_patch() -> None:
 
 
 def run(setting: Setting) -> None:
+    # NOTE: スタート、終了のログを出すためにこうしているが少し冗長かも？
     input_root_dir = setting.input_directory
     output_root_dir = setting.output_directory
+
     logger.debug(f"start convert: {input_root_dir} -> {output_root_dir}")
     convert_all(input_root_dir=input_root_dir, output_root_dir=output_root_dir)
     logger.debug(f"end convert: {input_root_dir} -> {output_root_dir}")
 
 
 def convert_all(input_root_dir: str, output_root_dir: str):
+    # NOTE: os.walk使うより、再帰処理にしたほうがきれいかも？（雑にメモリに展開されすぎている気がする）
     for dir_path, dir_list, file_list in os.walk(input_root_dir):
         file_count = len(file_list)
         if file_count == 0:
@@ -140,6 +143,7 @@ def convert_all(input_root_dir: str, output_root_dir: str):
         logger.debug(f"{dir_path} count: {file_count}")
         for filename in file_list:
             input_dir = dir_path
+            # FIXME: 出力先がなんとなくバグっている（絶対パス指定が怪しい）
             t = dir_path.split("/")
             if len(t) == 1:
                 output_dir = output_root_dir
@@ -156,6 +160,7 @@ def convert(input_dir: str, output_dir: str, filename: str) -> None:
     def _make_output_filename(f_, _is_image):
         if not _is_image:
             return f_
+        # FIXME: 強制的にファイル名が `file_name.png.webp` のようになってしまうので hook したい
         return f"{f_}.webp"
 
     def _row_copy(inp, out):
@@ -172,6 +177,7 @@ def convert(input_dir: str, output_dir: str, filename: str) -> None:
         if len(fragments) < 2:
             return False
         ext = fragments[-1].lower()
+        # FIXME: 変換可能なファイル形式が網羅できてない気がする
         return ext in ["jpg", "jpeg", "png", "gif", "bmp"]
 
     is_image = _is_image_file(filename)
