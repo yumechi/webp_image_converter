@@ -1,4 +1,4 @@
-name: unittest action
+name: Running Pytest
 
 on:
   push:
@@ -12,7 +12,7 @@ on:
 
 jobs:
   unitTest:
-    name: unittest
+    name: Running Pytest
     runs-on: ubuntu-latest
     strategy:
       matrix:
