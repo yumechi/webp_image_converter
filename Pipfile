@@ -21,4 +21,4 @@ python_version = "3.9"
 [script]
 black = "black ."
 mypy = "mypy --config-file ./mypy.ini"
-pytest = "PATHONPATH='./src' pytest -v tests/"
+pytest = "PATHONPATH='.' pytest -v tests/"
