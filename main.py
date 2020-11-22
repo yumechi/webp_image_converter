@@ -6,6 +6,8 @@ import yaml
 
 Setting = Optional[argparse.Namespace]
 
+logger = None
+
 
 class Logger:
     """
