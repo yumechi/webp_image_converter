@@ -1,8 +1,13 @@
-import os
 import argparse
+import os
+import pathlib
+from pathlib import PosixPath
+
 from PIL import Image
+
 from src.converter.const import Setting
 from src.converter.logger import Logger
+from src.converter.path_resolver import resolve_output_dir_path
 
 logger = None
 
@@ -58,15 +63,18 @@ def fix_patch() -> None:
 
 def run(setting: Setting) -> None:
     # NOTE: スタート、終了のログを出すためにこうしているが少し冗長かも？
-    input_root_dir = setting.input_directory
-    output_root_dir = setting.output_directory
+    input_root_dir = pathlib.PosixPath(setting.input_directory)
+    output_root_dir = pathlib.PosixPath(setting.output_directory)
 
     logger.debug(f"start convert: {input_root_dir} -> {output_root_dir}")
     convert_all(input_root_dir=input_root_dir, output_root_dir=output_root_dir)
     logger.debug(f"end convert: {input_root_dir} -> {output_root_dir}")
 
 
-def convert_all(input_root_dir: str, output_root_dir: str):
+def convert_all(
+    input_root_dir: PosixPath,
+    output_root_dir: PosixPath,
+) -> None:
     # NOTE: os.walk使うより、再帰処理にしたほうがきれいかも？（雑にメモリに展開されすぎている気がする）
     for dir_path, dir_list, file_list in os.walk(input_root_dir):
         file_count = len(file_list)
@@ -75,16 +83,15 @@ def convert_all(input_root_dir: str, output_root_dir: str):
             continue
         logger.debug(f"{dir_path} count: {file_count}")
         for filename in file_list:
-            input_dir = dir_path
+            input_dir = pathlib.Path(dir_path)
+            output_dir = resolve_output_dir_path(
+                input_dir, input_root_dir, output_root_dir
+            )
             # FIXME: 出力先がなんとなくバグっている（絶対パス指定が怪しい）
-            t = dir_path.split("/")
-            if len(t) == 1:
-                output_dir = output_root_dir
-            else:
-                output_dir = "/".join([output_root_dir] + t[1:])
+            logger.info("dirdebug: %s", output_dir)
             convert(
-                input_dir=input_dir,
-                output_dir=output_dir,
+                input_dir=str(input_dir),
+                output_dir=str(output_dir),
                 filename=filename,
             )
 

@@ -10,6 +10,7 @@ allow_prereleases = true
 pytest = "*"
 black = "*"
 mypy = "*"
+pytest-cov = "*"
 
 [packages]
 pillow = "*"
@@ -19,6 +20,7 @@ pyyaml = "*"
 python_version = "3.9"
 
 [script]
+convert = "PYTHONPATH='.' python src/converter/convert_file.py"
 black = "black ."
 mypy = "mypy --config-file ./mypy.ini"
 pytest = "pytest -v tests/"
