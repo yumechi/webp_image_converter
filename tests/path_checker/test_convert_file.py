@@ -1,23 +1,11 @@
-from src import main
-from src.main import convert_all
 import pathlib
 import shutil
 
+from src.converter import convert_file
+from src.converter.logger import Logger
+
 INPUT_ROOT_DIR = pathlib.Path("./test_input")
 OUTPUT_ROOT_DIR = pathlib.Path("./test_output")
-
-
-# デフォルト logger を上書き
-# FIXME: これなんかもう少しうまくフックしたい
-def create_default_config():
-    import logging.config
-
-    logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
-    _logger = logging.getLogger("WebpConverterAppDebug")
-    _logger.debug("default logger_init")
-    del logging
-
-    return _logger
 
 
 def cleanup_output_dir_files():
@@ -38,8 +26,8 @@ def test_convert_all():
     ファイル・フォルダの作成が正常に行われることの確認。
     """
 
-    main.logger = create_default_config()
-    convert_all(str(INPUT_ROOT_DIR), str(OUTPUT_ROOT_DIR))
+    convert_file.logger = Logger().get_logger()
+    convert_file.convert_all(str(INPUT_ROOT_DIR), str(OUTPUT_ROOT_DIR))
 
 
 def test_check_directory_path():
