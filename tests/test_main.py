@@ -1,7 +1,5 @@
-import main
-from main import convert_all, Logger
-import os
-import glob
+from src import main
+from src.main import convert_all
 import pathlib
 import shutil
 
@@ -12,7 +10,6 @@ OUTPUT_ROOT_DIR = pathlib.Path("./test_output")
 # デフォルト logger を上書き
 # FIXME: これなんかもう少しうまくフックしたい
 def create_default_config():
-    import logging
     import logging.config
 
     logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
