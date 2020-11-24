@@ -41,9 +41,7 @@ def test_check_directory_path():
         inp_s = str(inp)
         expect_output_content = inp_s.replace("input", "output")
         output_list = [
-            str(f)
-            for f in output_files
-            if expect_output_content in str(f)
+            str(f) for f in output_files if expect_output_content in str(f)
         ]
         if inp.is_dir():
             assert len(output_list) > 1
@@ -57,6 +55,7 @@ def test_check_directory_full_path():
     """
     import os
     import sys
+
     pwd = pathlib.Path(os.getcwd())
     input_root_dir_ = pwd / pathlib.Path("test_input")
     output_root_dir_ = pwd / pathlib.Path("test_output")
@@ -68,9 +67,7 @@ def test_check_directory_full_path():
         inp_s = str(inp)
         expect_output_content = inp_s.replace("input", "output")
         output_list = [
-            str(f)
-            for f in output_files
-            if expect_output_content in str(f)
+            str(f) for f in output_files if expect_output_content in str(f)
         ]
         if inp.is_dir():
             assert len(output_list) > 1

@@ -87,8 +87,6 @@ def convert_all(
             output_dir = resolve_output_dir_path(
                 input_dir, input_root_dir, output_root_dir
             )
-            # FIXME: 出力先がなんとなくバグっている（絶対パス指定が怪しい）
-            logger.info("dirdebug: %s", output_dir)
             convert(
                 input_dir=str(input_dir),
                 output_dir=str(output_dir),
