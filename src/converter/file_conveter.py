@@ -8,6 +8,9 @@ from src.converter.path_resolver import resolve_output_dir_path
 
 logger = None
 
+# TODO: 拡張子ベースチェックではなくデータの中身を見てチェックしたい
+CONVERT_TARGET_FILE_TYPE = [".jpg", ".jpeg", ".png", ".gif", ".bmp"]
+
 
 def convert_all(
     input_root_dir: PosixPath,
@@ -21,14 +24,15 @@ def convert_all(
             continue
         logger.debug(f"{dir_path} count: {file_count}")
         for filename in file_list:
+            file_path = pathlib.PosixPath(filename)
             input_dir = pathlib.PosixPath(dir_path)
             output_dir = resolve_output_dir_path(
                 input_dir, input_root_dir, output_root_dir
             )
             convert(
-                input_dir=str(input_dir),
-                output_dir=str(output_dir),
-                filename=filename,
+                input_dir=input_dir,
+                output_dir=output_dir,
+                file_path=file_path,
             )
 
 
@@ -49,21 +53,26 @@ def _row_copy(inp, out):
         logger.warning(f"Copy failed[{inp} -> {out}]: {e}")
 
 
-def _is_image_file(f_):
-    fragments = f_.split(".")
-    if len(fragments) < 2:
+def _is_image(file_path: PosixPath) -> bool:
+    if file_path.is_dir():
         return False
-    ext = fragments[-1].lower()
-    # FIXME: 変換可能なファイル形式が網羅できてない気がする
-    return ext in ["jpg", "jpeg", "png", "gif", "bmp"]
+
+    ext: str = file_path.suffix.lower()
+    return ext in CONVERT_TARGET_FILE_TYPE
 
 
-def convert(input_dir: str, output_dir: str, filename: str) -> None:
+def convert(
+    input_dir: PosixPath, output_dir: PosixPath, file_path: PosixPath
+) -> bool:
 
-    is_image = _is_image_file(filename)
+    if file_path.is_dir():
+        logger.warn(f"Skip: {file_path=} reason=Directory data")
+        return False
+
+    is_image = _is_image(file_path)
     os.makedirs(output_dir, exist_ok=True)
-    output_filename = _make_output_filename(filename, is_image)
-    input_path = f"{input_dir}/{filename}"
+    output_filename = _make_output_filename(file_path, is_image)
+    input_path = f"{input_dir}/{file_path}"
     output_path = f"{output_dir}/{output_filename}"
 
     try:
@@ -80,3 +89,4 @@ def convert(input_dir: str, output_dir: str, filename: str) -> None:
         logger.warning("Convert Error: %s\n%s", e, traceback.format_exc())
         # そのままコピーする
         _row_copy(input_path, output_path)
+    return True
