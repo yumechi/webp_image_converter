@@ -20,7 +20,7 @@ pyyaml = "*"
 python_version = "3.9"
 
 [script]
-convert = "PYTHONPATH='.' python src/converter/convert_file.py"
+convert = "PYTHONPATH='.' python src/converter/run.py"
 black = "black ."
 mypy = "mypy --config-file ./mypy.ini"
 pytest = "pytest -v tests/"

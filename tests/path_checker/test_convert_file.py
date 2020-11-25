@@ -1,7 +1,7 @@
 import pathlib
 import shutil
 
-from src.converter import convert_file
+from src.converter import run, file_conveter
 from src.converter.logger import Logger
 
 INPUT_ROOT_DIR = pathlib.Path("./test_input")
@@ -26,8 +26,8 @@ def test_convert_all():
     ファイル・フォルダの作成が正常に行われることの確認。
     """
 
-    convert_file.logger = Logger().get_logger()
-    convert_file.convert_all(INPUT_ROOT_DIR, OUTPUT_ROOT_DIR)
+    file_conveter.logger = Logger().get_logger()
+    file_conveter.convert_all(INPUT_ROOT_DIR, OUTPUT_ROOT_DIR)
 
 
 def test_check_directory_path():
@@ -59,7 +59,8 @@ def test_check_directory_full_path():
     pwd = pathlib.Path(os.getcwd())
     input_root_dir_ = pwd / pathlib.Path("test_input")
     output_root_dir_ = pwd / pathlib.Path("test_output")
-    convert_file.convert_all(input_root_dir_, output_root_dir_)
+    file_conveter.logger = Logger().get_logger()
+    file_conveter.convert_all(input_root_dir_, output_root_dir_)
 
     input_files = [f for f in input_root_dir_.rglob("*")]
     output_files = [str(f) for f in output_root_dir_.rglob("*")]

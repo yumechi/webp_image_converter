@@ -1,74 +1,12 @@
-import argparse
 import os
 import pathlib
 from pathlib import PosixPath
 
 from PIL import Image
 
-from src.converter.const import Setting
-from src.converter.logger import Logger
 from src.converter.path_resolver import resolve_output_dir_path
 
 logger = None
-
-
-def parse_args() -> Setting:
-    parser = argparse.ArgumentParser(description="Convert image to webp")
-    parser.add_argument(
-        "-i",
-        "--input-directory",
-        default="input",
-        type=str,
-        help="input file dir",
-    )
-    parser.add_argument(
-        "-o",
-        "--output-directory",
-        default="output",
-        type=str,
-        help="output file dir",
-    )
-    parser.add_argument(
-        "-m", "--mode", default=None, type=str, help="mode(feature)"
-    )
-    parser.add_argument(
-        "--logger-config",
-        default="logging.yaml",
-        type=argparse.FileType("r"),
-        help="logger config",
-    )
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="debug mode",
-    )
-    return parser.parse_args()
-
-
-def fix_patch() -> None:
-    """
-    ライブラリ周りでこちらがしてほしくない動きをするものを修正する。
-    今は PIL で DEBUG レベルのログが出るので、それを抑え込む処理だけ入っている。
-
-    Returns:
-        None
-    """
-
-    import logging
-
-    pil_logger = logging.getLogger("PIL")
-    pil_logger.setLevel(logging.INFO)
-    del logging
-
-
-def run(setting: Setting) -> None:
-    # NOTE: スタート、終了のログを出すためにこうしているが少し冗長かも？
-    input_root_dir = pathlib.PosixPath(setting.input_directory)
-    output_root_dir = pathlib.PosixPath(setting.output_directory)
-
-    logger.debug(f"start convert: {input_root_dir} -> {output_root_dir}")
-    convert_all(input_root_dir=input_root_dir, output_root_dir=output_root_dir)
-    logger.debug(f"end convert: {input_root_dir} -> {output_root_dir}")
 
 
 def convert_all(
@@ -83,7 +21,7 @@ def convert_all(
             continue
         logger.debug(f"{dir_path} count: {file_count}")
         for filename in file_list:
-            input_dir = pathlib.Path(dir_path)
+            input_dir = pathlib.PosixPath(dir_path)
             output_dir = resolve_output_dir_path(
                 input_dir, input_root_dir, output_root_dir
             )
@@ -135,13 +73,6 @@ def convert(input_dir: str, output_dir: str, filename: str) -> None:
         import traceback
 
         # print error, but continue
-        logger.warning("Error: %s", e)
+        logger.warning("Convert Error: %s\n%s", e, traceback.format_exc())
         # そのままコピーする
         _row_copy(input_path, output_path)
-
-
-if __name__ == "__main__":
-    setting_ = parse_args()
-    logger = Logger(setting_).get_logger()
-    fix_patch()
-    run(setting_)
