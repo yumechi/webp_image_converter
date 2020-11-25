@@ -32,29 +32,33 @@ def convert_all(
             )
 
 
+def _make_output_filename(f_, _is_image):
+    if not _is_image:
+        return f_
+    # FIXME: 強制的にファイル名が `file_name.png.webp` のようになってしまうので hook したい
+    return f"{f_}.webp"
+
+
+def _row_copy(inp, out):
+    import shutil
+
+    logger.debug(f"Copy: {inp} -> {out}")
+    try:
+        shutil.copy2(inp, out)
+    except Exception as e:
+        logger.warning(f"Copy failed[{inp} -> {out}]: {e}")
+
+
+def _is_image_file(f_):
+    fragments = f_.split(".")
+    if len(fragments) < 2:
+        return False
+    ext = fragments[-1].lower()
+    # FIXME: 変換可能なファイル形式が網羅できてない気がする
+    return ext in ["jpg", "jpeg", "png", "gif", "bmp"]
+
+
 def convert(input_dir: str, output_dir: str, filename: str) -> None:
-    def _make_output_filename(f_, _is_image):
-        if not _is_image:
-            return f_
-        # FIXME: 強制的にファイル名が `file_name.png.webp` のようになってしまうので hook したい
-        return f"{f_}.webp"
-
-    def _row_copy(inp, out):
-        import shutil
-
-        logger.debug(f"Copy: {inp} -> {out}")
-        try:
-            shutil.copy2(inp, out)
-        except Exception as e:
-            logger.warning(f"Copy failed[{inp} -> {out}]: {e}")
-
-    def _is_image_file(f_):
-        fragments = f_.split(".")
-        if len(fragments) < 2:
-            return False
-        ext = fragments[-1].lower()
-        # FIXME: 変換可能なファイル形式が網羅できてない気がする
-        return ext in ["jpg", "jpeg", "png", "gif", "bmp"]
 
     is_image = _is_image_file(filename)
     os.makedirs(output_dir, exist_ok=True)
