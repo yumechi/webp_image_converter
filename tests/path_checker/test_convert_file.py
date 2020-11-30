@@ -2,10 +2,11 @@
 全体的なテスト
 """
 
+import os
 import pathlib
 import shutil
 
-from src.converter import run, file_conveter
+from src.converter import file_conveter
 from src.converter.logger import Logger
 
 INPUT_ROOT_DIR = pathlib.Path("./test_input")
@@ -57,9 +58,6 @@ def test_check_directory_full_path():
     """
     コンバート後ディレクトリの確認その2
     """
-    import os
-    import sys
-
     pwd = pathlib.Path(os.getcwd())
     input_root_dir_ = pwd / pathlib.Path("test_input")
     output_root_dir_ = pwd / pathlib.Path("test_output")
@@ -80,7 +78,7 @@ def test_check_directory_full_path():
             assert len(output_list) == 1
 
 
-def skip_convert_file_green_1():
+def test_skip_convert_file_green_1():
     """
     ディレクトレりの場合はスキップされる
     """
@@ -91,7 +89,7 @@ def skip_convert_file_green_1():
     )
 
 
-def skip_convert_file_green_2():
+def test_skip_convert_file_green_2():
     """
     ディレクトレりの場合はスキップされる
     """
@@ -103,13 +101,10 @@ def skip_convert_file_green_2():
     )
 
 
-def skip_convert_file_green_3():
+def test_skip_convert_file_green_3():
     """
     ディレクトレりの場合はスキップされる
     """
-
-    import os
-    import sys
 
     pwd = pathlib.Path(os.getcwd())
     input_root_dir_ = pwd / pathlib.Path("test_input")

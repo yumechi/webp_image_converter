@@ -3,9 +3,9 @@
 """
 
 
+import os
 import pathlib
 from pathlib import PosixPath
-import os
 
 from src.converter import file_conveter
 
