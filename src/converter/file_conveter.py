@@ -36,14 +36,14 @@ def convert_all(
             )
 
 
-def _make_output_filename(f_, _is_image):
-    if not _is_image:
+def _make_output_filename(f_) -> PosixPath:
+    if not _is_image(f_):
         return f_
     # FIXME: 強制的にファイル名が `file_name.png.webp` のようになってしまうので hook したい
-    return f"{f_}.webp"
+    return pathlib.PosixPath(f"{f_}.webp")
 
 
-def _row_copy(inp, out):
+def _row_copy(inp, out) -> None:
     import shutil
 
     logger.debug(f"Copy: {inp} -> {out}")
@@ -71,7 +71,7 @@ def convert(
 
     is_image = _is_image(file_path)
     os.makedirs(output_dir, exist_ok=True)
-    output_filename = _make_output_filename(file_path, is_image)
+    output_filename = _make_output_filename(file_path)
     input_path = f"{input_dir}/{file_path}"
     output_path = f"{output_dir}/{output_filename}"
 
