@@ -12,6 +12,8 @@ from src.converter.logger import Logger
 INPUT_ROOT_DIR = pathlib.Path("./test_input")
 OUTPUT_ROOT_DIR = pathlib.Path("./test_output")
 
+file_conveter.logger = Logger().get_logger()
+
 
 def cleanup_output_dir_files():
     def _delete(file):
@@ -30,8 +32,6 @@ def test_convert_all():
     コンバート処理が行われたことのテスト。
     ファイル・フォルダの作成が正常に行われることの確認。
     """
-
-    file_conveter.logger = Logger().get_logger()
     file_conveter.convert_all(INPUT_ROOT_DIR, OUTPUT_ROOT_DIR)
 
 
@@ -80,22 +80,20 @@ def test_check_directory_full_path():
 
 def test_skip_convert_file_green_1():
     """
-    ディレクトレりの場合はスキップされる
+    ディレクトリの場合はスキップされる
     """
-    input_root_dir_ = pathlib.Path("test_input")
-    output_root_dir_ = pathlib.Path("test_output")
     assert not file_conveter.convert(
-        input_root_dir_, output_root_dir_, output_root_dir_
+        INPUT_ROOT_DIR, OUTPUT_ROOT_DIR, INPUT_ROOT_DIR
     )
 
 
 def test_skip_convert_file_green_2():
     """
-    ディレクトレりの場合はスキップされる
+    ディレクトリの場合はスキップされる
     """
-    input_root_dir_ = pathlib.Path("test_input/folder1")
-    output_root_dir_ = pathlib.Path("test_output")
-    output_dir = pathlib.Path("test_output/folder1")
+    input_root_dir_ = INPUT_ROOT_DIR / "folder1/"
+    output_root_dir_ = OUTPUT_ROOT_DIR / "test_output/"
+    output_dir = OUTPUT_ROOT_DIR / "folder1/"
     assert not file_conveter.convert(
         input_root_dir_, output_root_dir_, output_dir
     )
@@ -103,7 +101,7 @@ def test_skip_convert_file_green_2():
 
 def test_skip_convert_file_green_3():
     """
-    ディレクトレりの場合はスキップされる
+    ディレクトリの場合はスキップされる
     """
 
     pwd = pathlib.Path(os.getcwd())

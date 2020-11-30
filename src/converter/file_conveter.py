@@ -66,7 +66,7 @@ def convert(
 ) -> bool:
 
     if file_path.is_dir():
-        logger.warn(f"Skip: {file_path=} reason=Directory data")
+        logger.warning(f"Skip: {file_path=} reason=Directory data")
         return False
 
     is_image = _is_image(file_path)
