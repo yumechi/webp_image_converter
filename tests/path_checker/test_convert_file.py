@@ -1,3 +1,7 @@
+"""
+全体的なテスト
+"""
+
 import pathlib
 import shutil
 
@@ -74,6 +78,45 @@ def test_check_directory_full_path():
             assert len(output_list) > 1
         else:
             assert len(output_list) == 1
+
+
+def skip_convert_file_green_1():
+    """
+    ディレクトレりの場合はスキップされる
+    """
+    input_root_dir_ = pathlib.Path("test_input")
+    output_root_dir_ = pathlib.Path("test_output")
+    assert not file_conveter.convert(
+        input_root_dir_, output_root_dir_, output_root_dir_
+    )
+
+
+def skip_convert_file_green_2():
+    """
+    ディレクトレりの場合はスキップされる
+    """
+    input_root_dir_ = pathlib.Path("test_input/folder1")
+    output_root_dir_ = pathlib.Path("test_output")
+    output_dir = pathlib.Path("test_output/folder1")
+    assert not file_conveter.convert(
+        input_root_dir_, output_root_dir_, output_dir
+    )
+
+
+def skip_convert_file_green_3():
+    """
+    ディレクトレりの場合はスキップされる
+    """
+
+    import os
+    import sys
+
+    pwd = pathlib.Path(os.getcwd())
+    input_root_dir_ = pwd / pathlib.Path("test_input")
+    output_root_dir_ = pwd / pathlib.Path("test_output")
+    assert not file_conveter.convert(
+        input_root_dir_, output_root_dir_, output_root_dir_
+    )
 
 
 def test_cleanup_file():

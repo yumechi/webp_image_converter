@@ -1,3 +1,8 @@
+"""
+ファイル名などの細かい変換をする関数たちのテスト
+"""
+
+
 import pathlib
 from pathlib import PosixPath
 import os
