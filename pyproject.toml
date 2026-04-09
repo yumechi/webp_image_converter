@@ -12,31 +12,32 @@ dependencies = [
 dev = [
     "pytest>=9.0.2",
     "pytest-cov>=7.1.0",
-    "black>=26.3.1",
-    "mypy>=1.20.0",
+    "ruff>=0.15.8",
+    "ty>=0.0.27",
 ]
 
 [tool.uv]
 package = false
 # サプライチェーンリスク対策: リリースから 7 日以上経過したバージョンのみ採用する。
-# 依存を更新する際はこの日付を作業日 (もしくは 7 日前) にバンプして `uv lock` する。
-exclude-newer = "2026-04-02T00:00:00Z"
+# uv 0.11.4+ の relative timestamp 機能でロック実行時点を基準に解釈される。
+required-version = ">=0.11.4"
+exclude-newer = "7 days"
 
-[tool.black]
+[tool.ruff]
 line-length = 79
-target-version = ['py314']
-include = '\.pyi?$'
-exclude = '''
-/(
-  \.eggs
-  | \.git
-  | \.mypy_cache
-  | \.venv
-)/
-'''
+target-version = "py314"
+extend-exclude = [".venv", ".mypy_cache"]
 
-[tool.mypy]
-python_version = "3.14"
+[tool.ruff.format]
+# black 互換のフォーマッタ。デフォルト設定で十分。
+
+[tool.ruff.lint]
+# まずは pycodestyle (E) / pyflakes (F) / isort (I) の最小セットから。
+select = ["E", "F", "I"]
+
+[tool.ty]
+# 型チェッカ ty (Astral, alpha) の設定。
+# Python バージョンは .python-version / requires-python から拾う。
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
