@@ -1,11 +1,12 @@
 import argparse
+import logging
 import pathlib
 
+import src.converter.file_converter as file_converter
 from src.converter.const import Setting
-import src.converter.file_conveter as file_conveter
 from src.converter.logger import Logger
 
-logger = None
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 def parse_args() -> Setting:
@@ -27,10 +28,12 @@ def parse_args() -> Setting:
     parser.add_argument(
         "-m", "--mode", default=None, type=str, help="mode(feature)"
     )
+    # NOTE: argparse.FileType は Python 3.14 で deprecated。
+    # ファイル名だけ受け取り、open は Logger 側で行う。
     parser.add_argument(
         "--logger-config",
         default="logging.yaml",
-        type=argparse.FileType("r"),
+        type=str,
         help="logger config",
     )
     parser.add_argument(
@@ -44,27 +47,26 @@ def parse_args() -> Setting:
 def fix_patch() -> None:
     """
     ライブラリ周りでこちらがしてほしくない動きをするものを修正する。
-    今は PIL で DEBUG レベルのログが出るので、それを抑え込む処理だけ入っている。
+
+    今は PIL で DEBUG レベルのログが出るので、それを抑え込む処理だけ
+    入っている。
 
     Returns:
         None
     """
 
-    import logging
-
     pil_logger = logging.getLogger("PIL")
     pil_logger.setLevel(logging.INFO)
-    del logging
 
 
 def run(setting: Setting) -> None:
     # NOTE: スタート、終了のログを出すためにこうしているが少し冗長かも？
-    input_root_dir = pathlib.PosixPath(setting.input_directory)
-    output_root_dir = pathlib.PosixPath(setting.output_directory)
+    input_root_dir = pathlib.Path(setting.input_directory)
+    output_root_dir = pathlib.Path(setting.output_directory)
 
     logger.debug(f"start convert: {input_root_dir} -> {output_root_dir}")
-    file_conveter.logger = logger
-    file_conveter.convert_all(
+    file_converter.logger = logger
+    file_converter.convert_all(
         input_root_dir=input_root_dir, output_root_dir=output_root_dir
     )
     logger.debug(f"end convert: {input_root_dir} -> {output_root_dir}")

@@ -32,6 +32,15 @@ jobs:
       - name: Display Python version
         run: uv run python -c "import sys; print(sys.version)"
 
+      - name: Lint (ruff check)
+        run: uv run ruff check src tests
+
+      - name: Format check (ruff format)
+        run: uv run ruff format --check src tests
+
+      - name: Type check (ty)
+        run: uv run ty check src tests
+
       - name: Run pytest
         run: uv run pytest -v tests/ --cov=./ --cov-report=xml
 
