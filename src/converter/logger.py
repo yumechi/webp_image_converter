@@ -1,4 +1,5 @@
 import yaml
+
 from src.converter.const import Setting
 
 
@@ -12,7 +13,7 @@ class Logger:
 
     _logger = None
 
-    def __init__(self, setting: Setting = None):
+    def __init__(self, setting: Setting | None = None):
         if setting:
             config_file = setting.logger_config or None
             self._debug = setting.debug
@@ -30,24 +31,25 @@ class Logger:
     def create_config(self, config_file):
         if config_file:
             return self.create_custom_logger(config_file)
-        return self.default_config()
+        return self.create_default_config()
 
     def create_custom_logger(self, config_file):
         import logging.config
 
         _logger = None
         try:
-            logging.config.dictConfig(yaml.safe_load(config_file))
+            with open(config_file, "r") as f:
+                logging.config.dictConfig(yaml.safe_load(f))
             _logger = logging.getLogger(self.logger_name())
             _logger.debug("custom logger_init")
-        except yaml.YAMLError as e:
+        except yaml.YAMLError, OSError:
             import traceback
 
             # logger の設定前に失敗しているのでここは print
             print(f"yaml load error: {traceback.format_exc()}")
         finally:
             if not _logger:
-                _logger = self.create_config()
+                _logger = self.create_default_config()
             del logging
         return _logger
 

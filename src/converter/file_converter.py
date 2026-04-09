@@ -1,31 +1,33 @@
+import logging
 import os
 import pathlib
-from pathlib import PosixPath
+from pathlib import Path
 
 from PIL import Image
 
 from src.converter.path_resolver import resolve_output_dir_path
 
-logger = None
+logger: logging.Logger = logging.getLogger(__name__)
 
 # TODO: 拡張子ベースチェックではなくデータの中身を見てチェックしたい
 CONVERT_TARGET_FILE_TYPE = [".jpg", ".jpeg", ".png", ".gif", ".bmp"]
 
 
 def convert_all(
-    input_root_dir: PosixPath,
-    output_root_dir: PosixPath,
+    input_root_dir: Path,
+    output_root_dir: Path,
 ) -> None:
-    # NOTE: os.walk使うより、再帰処理にしたほうがきれいかも？（雑にメモリに展開されすぎている気がする）
-    for dir_path, dir_list, file_list in os.walk(input_root_dir):
+    # NOTE: os.walk使うより、再帰処理にしたほうがきれいかも？  # noqa: E501
+    # （雑にメモリに展開されすぎている気がする）
+    for dir_path, _dir_list, file_list in os.walk(input_root_dir):
         file_count = len(file_list)
         if file_count == 0:
             # skip
             continue
         logger.debug(f"{dir_path} count: {file_count}")
         for filename in file_list:
-            file_path = pathlib.PosixPath(filename)
-            input_dir = pathlib.PosixPath(dir_path)
+            file_path = pathlib.Path(filename)
+            input_dir = pathlib.Path(dir_path)
             output_dir = resolve_output_dir_path(
                 input_dir, input_root_dir, output_root_dir
             )
@@ -36,14 +38,14 @@ def convert_all(
             )
 
 
-def _make_output_filename(f_) -> PosixPath:
+def _make_output_filename(f_: Path) -> Path:
     if not _is_image(f_):
         return f_
-    # FIXME: 強制的にファイル名が `file_name.png.webp` のようになってしまうので hook したい
-    return pathlib.PosixPath(f"{f_}.webp")
+    # FIXME: 強制的にファイル名が `file_name.png.webp` のようになってしまうので hook したい  # noqa: E501
+    return pathlib.Path(f"{f_}.webp")
 
 
-def _row_copy(inp, out) -> None:
+def _row_copy(inp: str, out: str) -> None:
     import shutil
 
     logger.debug(f"Copy: {inp} -> {out}")
@@ -53,7 +55,7 @@ def _row_copy(inp, out) -> None:
         logger.warning(f"Copy failed[{inp} -> {out}]: {e}")
 
 
-def _is_image(file_path: PosixPath) -> bool:
+def _is_image(file_path: Path) -> bool:
     if file_path.is_dir():
         return False
 
@@ -61,10 +63,7 @@ def _is_image(file_path: PosixPath) -> bool:
     return ext in CONVERT_TARGET_FILE_TYPE
 
 
-def convert(
-    input_dir: PosixPath, output_dir: PosixPath, file_path: PosixPath
-) -> bool:
-
+def convert(input_dir: Path, output_dir: Path, file_path: Path) -> bool:
     if file_path.is_dir():
         logger.warning(f"Skip: {file_path=} reason=Directory data")
         return False
